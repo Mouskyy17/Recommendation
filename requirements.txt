@@ -1,0 +1,10 @@
+streamlit
+scikit-learn
+tempfile
+os
+PdfReader
+openai
+pandas
+json
+spacy
+requests
