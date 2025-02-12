@@ -6,5 +6,5 @@ PdfReader
 openai
 pandas
 json
-spaCy
+spacy
 requests
