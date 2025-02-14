@@ -130,13 +130,16 @@ def main():
         # Section Établissements
         st.subheader("🎓 Établissements recommandés")
         for etab in st.session_state['recommendations']:
-            with st.expander(f"{etab['etablissement']} - {etab['ville']}"):
+            etablissement = etab.get('etablissement', 'Établissement inconnu')
+            ville = etab.get('ville', 'Ville inconnue')
+            with st.expander(f"{etablissement} - {ville}"):
                 col1, col2, col3 = st.columns([1,2,1])
                 with col1:
                     st.image(etab.get('logo', 'https://via.placeholder.com/150'), width=100)
                 with col2:
-                    st.write(f"**Programme:** {etab['formation']}")
-                    st.write(f"**Spécialités:** {etab['specialites']}")
+                    st.write(f"**Programme:** {etab.get('formation', 'Non spécifié')}")
+                    st.write(f"**Spécialités:** {etab.get('specialites', 'Non spécifié')}")
+
                 with col3:
                     if st.button("Générer lettre", key=etab['etablissement']):
                         generate_cover_letter(etab)
