@@ -12,7 +12,12 @@ import os
 
 # Configuration initiale
 st.set_page_config(page_title="World Like Home - Assistant Mobilité", layout="wide")
-nlp = spacy.load("fr_core_news_md")  # Modèle français
+try:
+    nlp = spacy.load("fr_core_news_md")
+except OSError:
+    import subprocess
+    subprocess.run(["python", "-m", "spacy", "download", "fr_core_news_md"])
+    nlp = spacy.load("fr_core_news_md")
 
 # ---- Partie Backend ----
 class StudentAnalyzer:
