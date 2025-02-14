@@ -70,7 +70,7 @@ def main():
     with st.sidebar:
         st.header("📤 Téléchargement des documents")
         cv_file = st.file_uploader("CV (PDF)", type=["pdf"])
-        grades_file = st.file_uploader("Relevés de notes (CSV)", type=["csv"])
+        grades_file = st.file_uploader("Relevés de notes (Pdf)", type=["pdf"])
         aspirations = st.text_area("Aspirations professionnelles")
         
         if st.button("Lancer l'analyse"):
