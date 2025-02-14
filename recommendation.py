@@ -39,21 +39,58 @@ class StudentAnalyzer:
         return text
 
 
-    def _process_grades(self, grades_file):
-        """Traite les relevés de notes CSV"""
-        if grades_file is None:
-            return {}
-            
-        try:
-            grades_df = pd.read_csv(grades_file)
-            return {
-                'moyenne_generale': grades_df['Note'].mean(),
-                'matieres_fortes': grades_df.nlargest(3, 'Note')['Matière'].tolist(),
-                'matieres_faibles': grades_df.nsmallest(3, 'Note')['Matière'].tolist()
-            }
-        except Exception as e:
-            st.error(f"Erreur de lecture des notes : {str(e)}")
-            return {}
+    # Modifiez la méthode _process_grades
+def _process_grades(self, pdf_file):
+    """Traite les relevés de notes PDF avec extraction intelligente"""
+    if pdf_file is None:
+        return {}
+
+    try:
+        # Sauvegarde temporaire du PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(pdf_file.getvalue())
+            tmp_path = tmp.name
+
+        # Extraction des tableaux avec Camelot
+        tables = camelot.read_pdf(tmp_path, flavor='stream', pages='all')
+        
+        # Recherche des notes dans tout le texte
+        text = self.parse_cv(pdf_file)  # Utilise la méthode existante d'extraction texte
+        grades = self._find_grades_in_text(text)
+        
+        # Nettoyage du fichier temporaire
+        os.unlink(tmp_path)
+        
+        return {
+            'moyenne_generale': sum(grades.values())/len(grades) if grades else 0,
+            'matieres_fortes': sorted(grades, key=grades.get, reverse=True)[:3],
+            'matieres_faibles': sorted(grades, key=grades.get)[:3],
+            'raw_data': grades
+        }
+        
+    except Exception as e:
+        st.error(f"Erreur d'analyse du bulletin : {str(e)}")
+        return {}
+
+def _find_grades_in_text(self, text):
+    """Détection des notes par expressions régulières"""
+    grade_pattern = r"""
+        (\b(?:MATIERE|UE|COURS)\b[\s\S]*?)?  # Nom matière
+        (\b[A-ZÉÈÀÊÇ\s-]+\b)                # Nom matière alternative
+        [\s\S]*?
+        (?:Note|NOTE|Appréciation)\D*        # Libellé note
+        (\d{1,2}[.,]\d{2})                  # Format note
+    """
+    
+    matches = re.findall(grade_pattern, text, re.VERBOSE | re.IGNORECASE)
+    grades = {}
+    
+    for match in matches:
+        matiere = match[0].strip() if match[0] else match[1].strip()
+        note = float(match[2].replace(',', '.'))
+        grades[matiere] = note
+        
+    return grades
 
     def _analyze_sentiment(self, text):
         """Analyse simplifiée des aspirations (exemple)"""
