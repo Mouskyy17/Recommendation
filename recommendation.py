@@ -77,9 +77,14 @@ class EstablishmentMatcher:
         self.etablissements = self._load_etablissements_data()
     
     def _load_etablissements_data(self):
-        """Charge les données des établissements depuis l'API Parcoursup"""
-        response = requests.get("https://mesr.opendatasoft.com/api/records/1.0/search/?dataset=fr-esr-parcoursup")
-        return pd.DataFrame([r['fields'] for r in response.json()['records']])
+        """Charge les données des établissements"""
+        response = requests.get("https://data.enseignementsup-recherche.gouv.fr/pages/home/")
+        # CORRECTION : Utilisation des bonnes clés
+        return pd.DataFrame([{
+            'etablissement': item.get('fields', {}).get('etablissement_lib'),
+            'ville': item.get('fields', {}).get('commune_lib'),
+            'formation': item.get('fields', {}).get('form_lib_voe_acc')
+        } for item in response.json().get('records', [])])
 
     def match_establishments(self, student_profile):
         """Algorithme de matching des établissements"""
