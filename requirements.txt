@@ -5,6 +5,6 @@ thinc==8.2.1
 python-dotenv==1.0.0
 openai==0.28.0
 pandas==2.0.3
-numpy==1.24.4
+numpy>=1.25
 PyPDF2==3.0.1
 requests==2.31.0
