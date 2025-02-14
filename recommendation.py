@@ -38,6 +38,32 @@ class StudentAnalyzer:
         os.unlink(tmp.name)
         return text
 
+
+    def _process_grades(self, grades_file):
+        """Traite les relevés de notes CSV"""
+        if grades_file is None:
+            return {}
+            
+        try:
+            grades_df = pd.read_csv(grades_file)
+            return {
+                'moyenne_generale': grades_df['Note'].mean(),
+                'matieres_fortes': grades_df.nlargest(3, 'Note')['Matière'].tolist(),
+                'matieres_faibles': grades_df.nsmallest(3, 'Note')['Matière'].tolist()
+            }
+        except Exception as e:
+            st.error(f"Erreur de lecture des notes : {str(e)}")
+            return {}
+
+    def _analyze_sentiment(self, text):
+        """Analyse simplifiée des aspirations (exemple)"""
+        doc = nlp(text)
+        return {
+            'mots_cles': [token.lemma_ for token in doc if token.pos_ in ['NOUN', 'VERB']],
+            'sentiment': 'positif' if sum(token.sentiment for token in doc) > 0 else 'neutre/negatif'
+        }
+
+
     def analyze_profile(self, cv_text, grades, aspirations):
         """Analyse NLP du profil étudiant"""
         doc = nlp(cv_text + " " + aspirations)
